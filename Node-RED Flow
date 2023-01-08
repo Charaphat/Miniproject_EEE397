@@ -1,0 +1,166 @@
+[
+    {
+        "id": "8c99147eda611594",
+        "type": "tab",
+        "label": "TTN_to_InfluxDB",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "84a4733c4bcf2e63",
+        "type": "function",
+        "z": "8c99147eda611594",
+        "name": "Base64 to long Hex",
+        "func": "function base64ToBase16(base64) {\n    return Buffer.from(base64, 'base64').toString('hex').toUpperCase();\n}\n//var string = base64ToBase16(msg.payload);\nvar string = base64ToBase16(msg.payload.uplink_message.frm_payload);\nmsg.payload = string;\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 670,
+        "y": 300,
+        "wires": [
+            [
+                "bd897d397bc86a85"
+            ]
+        ]
+    },
+    {
+        "id": "bd897d397bc86a85",
+        "type": "function",
+        "z": "8c99147eda611594",
+        "name": "arrayInDec",
+        "func": "function hexToArray(hex) {\n    let result = [];\n    for (let i = 0; i < hex.length; i += 2) {\n        let hexNum = hex.substring(i, i + 2);\n        let decimalNum = parseInt(hexNum, 16);\n        result.push(decimalNum);\n    }\n    return result;\n}\n\nvar putToArray = hexToArray(msg.payload);\nmsg.payload = putToArray;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 890,
+        "y": 300,
+        "wires": [
+            [
+                "46a093dc3d12cf51"
+            ]
+        ]
+    },
+    {
+        "id": "46a093dc3d12cf51",
+        "type": "function",
+        "z": "8c99147eda611594",
+        "name": "function 3",
+        "func": "var array = msg.payload;\nvar newArray = [];\nvar obj = {};\nfunction resultArray(array) {\n\n    for (let i = 0; i < array.length; i += 2) {\n        newArray.push(array[i] + (array[i + 1] / 10));\n    }\n    for (var i = 1; i <= array.length / 2; i++) {\n        obj[\"point\" + i] = newArray[i - 1];\n    }\n\n    return obj;\n}\n\nmsg.payload = resultArray(array);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1060,
+        "y": 400,
+        "wires": [
+            [
+                "40db3536bfab1446",
+                "72a20665f92ed439"
+            ]
+        ]
+    },
+    {
+        "id": "72a20665f92ed439",
+        "type": "influxdb out",
+        "z": "8c99147eda611594",
+        "influxdb": "2a2fca07833aa201",
+        "name": "inputToInfluxDB",
+        "measurement": "sensor",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "minipro",
+        "bucket": "test1",
+        "x": 1300,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "40db3536bfab1446",
+        "type": "debug",
+        "z": "8c99147eda611594",
+        "name": "checkResult",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1290,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "019077003169234b",
+        "type": "mqtt in",
+        "z": "8c99147eda611594",
+        "name": "mqtt_input_from_TTN",
+        "topic": "#",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "4f2d9446f73ac332",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 420,
+        "y": 300,
+        "wires": [
+            [
+                "84a4733c4bcf2e63"
+            ]
+        ]
+    },
+    {
+        "id": "2a2fca07833aa201",
+        "type": "influxdb",
+        "hostname": "127.0.0.1",
+        "port": "8086",
+        "protocol": "http",
+        "database": "database",
+        "name": "minipro",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "2.0",
+        "url": "http://192.168.1.58:8086/",
+        "rejectUnauthorized": true
+    },
+    {
+        "id": "4f2d9446f73ac332",
+        "type": "mqtt-broker",
+        "name": "minipro_test1",
+        "broker": "au1.cloud.thethings.network:1883",
+        "port": "1883",
+        "tls": "",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    }
+]
